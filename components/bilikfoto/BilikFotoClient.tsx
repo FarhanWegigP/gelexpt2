@@ -625,8 +625,8 @@ export function BilikFotoClient() {
           <div
             className="relative overflow-hidden rounded-[28px]"
             style={{
-              width: "min(380px, 92vw)",
-              height: PREVIEW_HEIGHT,
+              width: "min(480px, 92vw)",
+              aspectRatio: "4/3",
               border: `2px solid ${selectedFilter.color}66`,
               background: "linear-gradient(180deg, rgba(10,14,26,0.9) 0%, rgba(26,35,64,0.75) 100%)",
               boxShadow: `0 0 34px ${selectedFilter.color}22`,
