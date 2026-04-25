@@ -5,16 +5,6 @@ import { tr } from "@/lib/translate";
 
 const features = [
   {
-    id: "ukmatch",
-    icon: "♥",
-    titleId: "UKMatch",
-    titleEn: "UKMatch",
-    color: "#ec4899",
-    glow: "rgba(236,72,153,0.2)",
-    descId: "Jawab 8 pertanyaan kuis kepribadian. Sistem AI cocokkan kamu dengan UKM terbaik dari 39 UKM UGM.",
-    descEn: "Answer 8 personality quiz questions. The AI system matches you with the best UKM from 39 UGM student organizations.",
-  },
-  {
     id: "gelexy",
     icon: "🌌",
     titleId: "Gelexy",

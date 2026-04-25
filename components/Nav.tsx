@@ -8,7 +8,6 @@ import { tr } from "@/lib/translate";
 
 const links = [
   { href: "/", id: "Beranda", en: "Home" },
-  { href: "/ukmatch", id: "UKMatch", en: "UKMatch" },
   { href: "/gelexy", id: "Gelexy", en: "Gelexy" },
   { href: "/anthem", id: "Anthem", en: "Anthem" },
 ];
@@ -52,7 +51,7 @@ export function Nav() {
         </span>
       </Link>
 
-      <div className="nav-desktop-links hidden md:flex gap-8 items-center">
+      <div className="nav-desktop-links hidden md:flex gap-8 items-center absolute left-1/2 -translate-x-1/2">
         {links.map((l) => (
           <Link
             key={l.href}
@@ -69,19 +68,20 @@ export function Nav() {
             {tr(lang, l.id, l.en)}
           </Link>
         ))}
-        <button
-          onClick={toggleLang}
-          className="rounded-full px-3 py-1.5 text-[11px] font-bold tracking-[0.08em] cursor-pointer"
-          style={{
-            background: "rgba(245,200,66,0.12)",
-            color: "#f5c842",
-            border: "1px solid rgba(245,200,66,0.25)",
-          }}
-          title={lang === "id" ? "Bahasa aktif: Indonesia" : "Active language: English"}
-        >
-          {lang.toUpperCase()}
-        </button>
       </div>
+
+      <button
+        onClick={toggleLang}
+        className="hidden md:block rounded-full px-3 py-1.5 text-[11px] font-bold tracking-[0.08em] cursor-pointer"
+        style={{
+          background: "rgba(245,200,66,0.12)",
+          color: "#f5c842",
+          border: "1px solid rgba(245,200,66,0.25)",
+        }}
+        title={lang === "id" ? "Bahasa aktif: Indonesia" : "Active language: English"}
+      >
+        {lang.toUpperCase()}
+      </button>
 
       <button
         className="md:hidden flex items-center justify-center w-10 h-10 text-[#f1f5f9] text-xl bg-transparent border-none cursor-pointer"

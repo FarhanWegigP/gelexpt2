@@ -5,7 +5,6 @@ import { useLanguage } from "./LanguageProvider";
 import { tr } from "@/lib/translate";
 
 const links = [
-  { href: "/ukmatch", id: "UKMatch", en: "UKMatch" },
   { href: "/gelexy", id: "Gelexy", en: "Gelexy" },
   { href: "/anthem", id: "Anthem", en: "Anthem" },
 ];

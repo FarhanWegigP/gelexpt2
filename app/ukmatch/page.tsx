@@ -1,7 +1,5 @@
-import { UKMatchClient } from "@/components/ukmatch/UKMatchClient";
-
-export const metadata = { title: "UKMatch – GELEX 2026" };
+import { redirect } from "next/navigation";
 
 export default function UKMatchPage() {
-  return <UKMatchClient />;
+  redirect("/");
 }

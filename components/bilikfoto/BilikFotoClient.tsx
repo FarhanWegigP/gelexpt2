@@ -345,8 +345,14 @@ export function BilikFotoClient() {
           >
             BILIK FOTO
           </h2>
-          <p className="text-[14px] mb-10 text-center" style={{ color: "#64748b" }}>
-            Pilih sekber dulu, lalu pilih UKM-nya
+          <p
+            className="text-[13px] mb-10 text-center leading-[1.8]"
+            style={{ color: "#94a3b8", maxWidth: 680 }}
+          >
+            &ldquo;Bilik Foto UKM&rdquo; adalah fitur digital photobooth interaktif yang memungkinkan pengguna berfoto
+            dengan berbagai filter bertema UKM. Setiap filter dilengkapi dengan latar belakang tempat, kostum, serta
+            aksesoris tambahan yang sesuai dengan karakteristik masing-masing UKM, sehingga foto yang dihasilkan terasa
+            lebih personal dan menarik. Setelah selesai berfoto, hasil jepretan dapat langsung dicetak maupun diunduh.
           </p>
 
           <div
