@@ -8,6 +8,7 @@ export interface UKMEntry {
   links: [number, number][];
   gameType?: "quiz" | "reaction" | "runner" | "archery" | "volley" | "placeholder";
   quizQuestions?: { q: string; opts: string[]; ans: number }[];
+  logoSrc?: string;
 }
 
 export interface OrbitGroup {
@@ -110,6 +111,7 @@ export const ORBIT_GROUPS: OrbitGroup[] = [
         name: "UKM Berkuda UGM",
         hasGame: true,
         emoji: "🐎",
+        logoSrc: "/assets/logo-berkuda.png",
         desc: "UKM Berkuda UGM jadi ruang buat melatih fokus, keseimbangan, dan chemistry antara penunggang dengan kudanya. Di mini game ini, Gilang menunggang kuda dan berlari otomatis di lintasan yang makin cepat, jadi kamu harus jeli menentukan timing lompatan untuk melewati rintangan yang makin rapat dan menantang.",
         stars: [{ x: -40, y: 10 }, { x: -18, y: -32 }, { x: 16, y: -30 }, { x: 42, y: 4 }, { x: 10, y: 34 }, { x: -18, y: 32 }],
         links: [[0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 0], [1, 5], [2, 4]],
@@ -120,6 +122,7 @@ export const ORBIT_GROUPS: OrbitGroup[] = [
         name: "UKM Panahan UGM",
         hasGame: true,
         emoji: "🏹",
+        logoSrc: "/assets/logo-panahan.png",
         desc: "UKM Panahan UGM identik dengan ketenangan, kontrol napas, dan akurasi. Mini game panahan ini meniru momen latihan bidik: kamu menahan untuk menarik busur, mengatur tenaga, lalu melepas panah pada saat yang paling pas ketika target bergerak naik turun di arena.",
         stars: [{ x: 0, y: -48 }, { x: 36, y: -18 }, { x: 32, y: 24 }, { x: 0, y: 42 }, { x: -32, y: 24 }, { x: -36, y: -18 }],
         links: [[0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 0], [0, 3], [1, 4]],
@@ -130,6 +133,7 @@ export const ORBIT_GROUPS: OrbitGroup[] = [
         name: "UKM Voli UGM",
         hasGame: true,
         emoji: "🏐",
+        logoSrc: "/assets/logo-voli.png",
         desc: "UKM Voli UGM menonjolkan koordinasi tim, refleks cepat, dan timing serangan yang presisi. Di mini game ini, setter akan mengangkat bola dengan sudut yang berubah-ubah pada tiap rally, lalu kamu harus klik tepat di momen emas untuk menghasilkan spike yang bersih dan bertenaga.",
         stars: [{ x: -40, y: -8 }, { x: -18, y: -38 }, { x: 18, y: -38 }, { x: 40, y: -8 }, { x: 24, y: 34 }, { x: -24, y: 34 }, { x: 0, y: 8 }],
         links: [[0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 0], [1, 6], [2, 6], [4, 6], [5, 6]],

@@ -143,39 +143,66 @@ export function ConstellationMap({ group, onUKMClick, onClose }: Props) {
               >
                 <circle cx={cx} cy={cy} r={scale * 1.2} fill={isHovered ? `${group.color}08` : "transparent"} />
 
-                {ukm.links.map(([a, b], lineIndex) => {
-                  const ax = cx + (ukm.stars[a].x / 50) * scale;
-                  const ay = cy + (ukm.stars[a].y / 50) * scale;
-                  const bx = cx + (ukm.stars[b].x / 50) * scale;
-                  const by = cy + (ukm.stars[b].y / 50) * scale;
-                  return (
-                    <line
-                      key={`l-${lineIndex}`}
-                      x1={ax}
-                      y1={ay}
-                      x2={bx}
-                      y2={by}
-                      stroke={lineColor}
-                      strokeWidth={isHovered ? 1.2 : 0.8}
-                    />
-                  );
-                })}
-
-                {ukm.stars.map((star, starIndex) => {
-                  const sx = cx + (star.x / 50) * scale;
-                  const sy = cy + (star.y / 50) * scale;
-                  const r = starIndex === 0 ? (isHovered ? 5.5 : 4) : isHovered ? 3.5 : 2.5;
-                  return (
+                {ukm.logoSrc ? (
+                  <>
+                    <defs>
+                      <clipPath id={`logo-clip-${ukmIndex}`}>
+                        <circle cx={cx} cy={cy} r={scale * 0.85} />
+                      </clipPath>
+                    </defs>
                     <circle
-                      key={`s-${starIndex}`}
-                      cx={sx}
-                      cy={sy}
-                      r={r}
-                      fill={starColor}
-                      filter={isHovered ? "url(#starGlowHover)" : "url(#starGlow)"}
+                      cx={cx} cy={cy} r={scale * 0.85}
+                      fill="rgba(10,14,26,0.6)"
+                      stroke={isHovered ? group.color : `${group.color}55`}
+                      strokeWidth={isHovered ? 2.5 : 1.5}
+                      filter={isHovered ? "url(#starGlowHover)" : undefined}
                     />
-                  );
-                })}
+                    <image
+                      href={ukm.logoSrc}
+                      x={cx - scale * 0.75}
+                      y={cy - scale * 0.75}
+                      width={scale * 1.5}
+                      height={scale * 1.5}
+                      clipPath={`url(#logo-clip-${ukmIndex})`}
+                      preserveAspectRatio="xMidYMid meet"
+                    />
+                  </>
+                ) : (
+                  <>
+                    {ukm.links.map(([a, b], lineIndex) => {
+                      const ax = cx + (ukm.stars[a].x / 50) * scale;
+                      const ay = cy + (ukm.stars[a].y / 50) * scale;
+                      const bx = cx + (ukm.stars[b].x / 50) * scale;
+                      const by = cy + (ukm.stars[b].y / 50) * scale;
+                      return (
+                        <line
+                          key={`l-${lineIndex}`}
+                          x1={ax} y1={ay} x2={bx} y2={by}
+                          stroke={lineColor}
+                          strokeWidth={isHovered ? 1.2 : 0.8}
+                        />
+                      );
+                    })}
+                    {ukm.stars.map((star, starIndex) => {
+                      const sx = cx + (star.x / 50) * scale;
+                      const sy = cy + (star.y / 50) * scale;
+                      const r = starIndex === 0 ? (isHovered ? 5.5 : 4) : isHovered ? 3.5 : 2.5;
+                      return (
+                        <circle
+                          key={`s-${starIndex}`}
+                          cx={sx} cy={sy} r={r}
+                          fill={starColor}
+                          filter={isHovered ? "url(#starGlowHover)" : "url(#starGlow)"}
+                        />
+                      );
+                    })}
+                    {isHovered && (
+                      <text x={cx} y={cy - scale * 1.3} textAnchor="middle" fontSize={18}>
+                        {ukm.emoji}
+                      </text>
+                    )}
+                  </>
+                )}
 
                 <text
                   x={cx}
@@ -188,11 +215,6 @@ export function ConstellationMap({ group, onUKMClick, onClose }: Props) {
                 >
                   {ukm.short}
                 </text>
-                {isHovered && (
-                  <text x={cx} y={cy - scale * 1.3} textAnchor="middle" fontSize={18}>
-                    {ukm.emoji}
-                  </text>
-                )}
               </g>
             );
           })}
