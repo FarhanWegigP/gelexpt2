@@ -153,9 +153,9 @@ export function HeroSection() {
               {tr(lang, "✦ Mulai Petualangan", "✦ Start Exploring")}
             </button>
           </Link>
-          <Link href="/simulasi">
+          <Link href="/gelexy">
             <button className="btn-secondary" style={{ fontSize: "clamp(13px,1.5vw,16px)" }}>
-              {tr(lang, "⊙ Simulasi UKM", "⊙ UKM Simulation")}
+              {tr(lang, "🌌 Gelexy", "🌌 Gelexy")}
             </button>
           </Link>
         </div>

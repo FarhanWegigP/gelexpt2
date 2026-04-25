@@ -1,7 +1,8 @@
 "use client";
 import { useState, useEffect, useRef, useCallback } from "react";
 import Image from "next/image";
-import { LYRICS, TOTAL_DURATION } from "./lyricsData";
+import { LYRICS } from "./lyricsData";
+import { sharedAudioRef } from "@/lib/audioRef";
 
 type Lang = "id" | "en";
 
@@ -10,20 +11,67 @@ const BAR_COUNT = 32;
 export function AnthemClient() {
   const [playing, setPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(0.8);
   const [lang, setLang] = useState<Lang>("id");
   const [bars, setBars] = useState<number[]>(Array(BAR_COUNT).fill(0));
-  const [ttsSupported, setTtsSupported] = useState(false);
-  const [ttsSpeaking, setTtsSpeaking] = useState(false);
 
-  const timerRef = useRef<ReturnType<typeof setInterval>>();
   const barTimerRef = useRef<ReturnType<typeof setInterval>>();
   const lyricsRef = useRef<HTMLDivElement>(null);
 
-  // TTS support check
-  useEffect(() => {
-    setTtsSupported(typeof window !== "undefined" && "speechSynthesis" in window);
+  const animateBars = useCallback((active: boolean) => {
+    clearInterval(barTimerRef.current);
+    if (!active) {
+      setBars(Array(BAR_COUNT).fill(0));
+      return;
+    }
+    barTimerRef.current = setInterval(() => {
+      setBars(
+        Array.from({ length: BAR_COUNT }, (_, i) => {
+          const base = Math.sin(Date.now() / 200 + i * 0.5) * 0.3 + 0.4;
+          const rand = Math.random() * 0.4;
+          const center = 1 - (Math.abs(i - BAR_COUNT / 2) / (BAR_COUNT / 2)) * 0.4;
+          return Math.max(0.05, Math.min(1, (base + rand) * center));
+        })
+      );
+    }, 80);
   }, []);
+
+  // Wire up to real sharedAudioRef
+  useEffect(() => {
+    const audio = sharedAudioRef.current;
+    if (!audio) return;
+
+    // Sync volume
+    audio.volume = volume;
+
+    const onTimeUpdate = () => setCurrentTime(audio.currentTime);
+    const onDurationChange = () => setDuration(audio.duration || 0);
+    const onPlay = () => { setPlaying(true); animateBars(true); };
+    const onPause = () => { setPlaying(false); animateBars(false); };
+    const onEnded = () => { setPlaying(false); animateBars(false); };
+
+    audio.addEventListener("timeupdate", onTimeUpdate);
+    audio.addEventListener("durationchange", onDurationChange);
+    audio.addEventListener("play", onPlay);
+    audio.addEventListener("pause", onPause);
+    audio.addEventListener("ended", onEnded);
+
+    // Sync initial state
+    setCurrentTime(audio.currentTime);
+    setDuration(audio.duration || 0);
+    setPlaying(!audio.paused);
+    if (!audio.paused) animateBars(true);
+
+    return () => {
+      audio.removeEventListener("timeupdate", onTimeUpdate);
+      audio.removeEventListener("durationchange", onDurationChange);
+      audio.removeEventListener("play", onPlay);
+      audio.removeEventListener("pause", onPause);
+      audio.removeEventListener("ended", onEnded);
+      clearInterval(barTimerRef.current);
+    };
+  }, [animateBars]);
 
   // Active lyric index
   const activeLyricIdx = LYRICS.reduce((acc, line, i) => {
@@ -38,107 +86,52 @@ export function AnthemClient() {
     el?.scrollIntoView({ behavior: "smooth", block: "center" });
   }, [activeLyricIdx]);
 
-  // Fake equalizer bars animation
-  const animateBars = useCallback((active: boolean) => {
-    clearInterval(barTimerRef.current);
-    if (!active) {
-      setBars(Array(BAR_COUNT).fill(0));
-      return;
-    }
-    barTimerRef.current = setInterval(() => {
-      setBars(
-        Array.from({ length: BAR_COUNT }, (_, i) => {
-          const base = Math.sin(Date.now() / 200 + i * 0.5) * 0.3 + 0.4;
-          const rand = Math.random() * 0.4;
-          // center bars taller
-          const center = 1 - Math.abs(i - BAR_COUNT / 2) / (BAR_COUNT / 2) * 0.4;
-          return Math.max(0.05, Math.min(1, (base + rand) * center));
-        })
-      );
-    }, 80);
-  }, []);
-
-  // Play/pause
   const togglePlay = () => {
-    if (playing) {
-      clearInterval(timerRef.current);
-      animateBars(false);
-      setPlaying(false);
+    const audio = sharedAudioRef.current;
+    if (!audio) return;
+    if (audio.paused) {
+      audio.play().catch(() => {});
     } else {
-      setPlaying(true);
-      animateBars(true);
-      timerRef.current = setInterval(() => {
-        setCurrentTime((t) => {
-          if (t >= TOTAL_DURATION) {
-            clearInterval(timerRef.current);
-            animateBars(false);
-            setPlaying(false);
-            return 0;
-          }
-          return t + 0.25;
-        });
-      }, 250);
+      audio.pause();
     }
   };
 
-  // Restart
   const restart = () => {
-    clearInterval(timerRef.current);
-    setCurrentTime(0);
-    if (playing) {
-      // keep playing from start
-      timerRef.current = setInterval(() => {
-        setCurrentTime((t) => {
-          if (t >= TOTAL_DURATION) {
-            clearInterval(timerRef.current);
-            animateBars(false);
-            setPlaying(false);
-            return 0;
-          }
-          return t + 0.25;
-        });
-      }, 250);
-    }
+    const audio = sharedAudioRef.current;
+    if (!audio) return;
+    audio.currentTime = 0;
+    if (audio.paused) audio.play().catch(() => {});
   };
 
-  // Seek by clicking progress bar
   const seek = (e: React.MouseEvent<HTMLDivElement>) => {
+    const audio = sharedAudioRef.current;
+    if (!audio) return;
     const rect = e.currentTarget.getBoundingClientRect();
     const ratio = (e.clientX - rect.left) / rect.width;
-    setCurrentTime(Math.max(0, Math.min(TOTAL_DURATION, ratio * TOTAL_DURATION)));
+    audio.currentTime = Math.max(0, Math.min(audio.duration || 0, ratio * (audio.duration || 0)));
   };
 
-  // TTS current lyric
-  const speakCurrentLyric = () => {
-    if (!ttsSupported) return;
-    const line = LYRICS[activeLyricIdx];
-    if (!line) return;
-    window.speechSynthesis.cancel();
-    const utt = new SpeechSynthesisUtterance(lang === "id" ? line.id : line.en);
-    utt.lang = lang === "id" ? "id-ID" : "en-US";
-    utt.volume = volume;
-    utt.onstart = () => setTtsSpeaking(true);
-    utt.onend = () => setTtsSpeaking(false);
-    utt.onerror = () => setTtsSpeaking(false);
-    window.speechSynthesis.speak(utt);
+  const handleVolume = (val: number) => {
+    setVolume(val);
+    const audio = sharedAudioRef.current;
+    if (audio) audio.volume = val;
   };
 
-  // Cleanup
-  useEffect(() => {
-    return () => {
-      clearInterval(timerRef.current);
-      clearInterval(barTimerRef.current);
-      if (ttsSupported) window.speechSynthesis?.cancel();
-    };
-  }, [ttsSupported]);
+  const seekToLyric = (time: number) => {
+    const audio = sharedAudioRef.current;
+    if (!audio) return;
+    audio.currentTime = time;
+    if (audio.paused) audio.play().catch(() => {});
+  };
 
   const formatTime = (s: number) => {
+    if (!s || isNaN(s)) return "0:00";
     const m = Math.floor(s / 60);
     const sec = Math.floor(s % 60);
     return `${m}:${sec.toString().padStart(2, "0")}`;
   };
 
-  const progress = (currentTime / TOTAL_DURATION) * 100;
+  const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
 
   return (
     <div className="min-h-screen pt-24 pb-16 px-4 flex flex-col items-center">
@@ -166,16 +159,21 @@ export function AnthemClient() {
           {/* Album art */}
           <div className="flex items-center gap-5 mb-6">
             <div
-              className="flex-shrink-0 flex items-center justify-center rounded-2xl"
+              className="flex-shrink-0 flex items-center justify-center rounded-2xl overflow-hidden"
               style={{
                 width: 80,
                 height: 80,
-                background: "radial-gradient(circle,#fdd677,#f5c842,#ffb839)",
-                boxShadow: playing ? "0 0 30px rgba(245,200,66,0.6)" : "0 0 10px rgba(245,200,66,0.2)",
-                transition: "box-shadow 500ms",
+                background: "linear-gradient(135deg,#0a0e1a,#1a2340)",
+                border: playing
+                  ? "2px solid rgba(245,200,66,0.7)"
+                  : "2px solid rgba(245,200,66,0.2)",
+                boxShadow: playing
+                  ? "0 0 28px rgba(245,200,66,0.5), inset 0 0 20px rgba(245,200,66,0.05)"
+                  : "0 0 8px rgba(245,200,66,0.1)",
+                transition: "all 500ms",
               }}
             >
-              <Image src="/assets/logo-icon.svg" alt="GELEX" width={48} height={48} />
+              <Image src="/assets/logo-icon.svg" alt="GELEX" width={52} height={52} />
             </div>
             <div>
               <div className="font-orbitron font-black text-[18px]" style={{ color: "#f5c842" }}>
@@ -185,7 +183,7 @@ export function AnthemClient() {
                 Anthem Resmi · Gelanggang Expo UGM
               </div>
               <div className="text-[11px] mt-1" style={{ color: "#475569" }}>
-                {formatTime(currentTime)} / {formatTime(TOTAL_DURATION)}
+                {formatTime(currentTime)} / {formatTime(duration)}
               </div>
             </div>
           </div>
@@ -228,7 +226,6 @@ export function AnthemClient() {
           {/* Controls */}
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              {/* Restart */}
               <button
                 onClick={restart}
                 className="text-[20px] bg-transparent border-none cursor-pointer transition-opacity"
@@ -237,8 +234,6 @@ export function AnthemClient() {
               >
                 ⏮
               </button>
-
-              {/* Play/pause */}
               <button
                 onClick={togglePlay}
                 className="flex items-center justify-center rounded-full border-none cursor-pointer font-bold text-[22px] transition-all duration-200"
@@ -263,8 +258,8 @@ export function AnthemClient() {
                 max={1}
                 step={0.01}
                 value={volume}
-                onChange={(e) => setVolume(Number(e.target.value))}
-                className="w-full accent-yellow-400"
+                onChange={(e) => handleVolume(Number(e.target.value))}
+                className="w-full"
                 style={{ accentColor: "#f5c842" }}
               />
               <span className="text-[14px]" style={{ color: "#64748b" }}>🔊</span>
@@ -302,25 +297,12 @@ export function AnthemClient() {
           }}
         >
           <div
-            className="flex items-center justify-between px-5 py-3.5"
+            className="flex items-center px-5 py-3.5"
             style={{ borderBottom: "1px solid rgba(241,245,249,0.06)" }}
           >
             <div className="font-orbitron font-bold text-[12px]" style={{ color: "#64748b" }}>
               LIRIK · {lang === "id" ? "BAHASA INDONESIA" : "ENGLISH"}
             </div>
-            {ttsSupported && (
-              <button
-                onClick={speakCurrentLyric}
-                className="text-[12px] px-3 py-1 rounded-full border-none cursor-pointer transition-all duration-200"
-                style={{
-                  background: ttsSpeaking ? "rgba(245,200,66,0.2)" : "rgba(241,245,249,0.06)",
-                  color: ttsSpeaking ? "#f5c842" : "#64748b",
-                  border: `1px solid ${ttsSpeaking ? "rgba(245,200,66,0.4)" : "rgba(241,245,249,0.1)"}`,
-                }}
-              >
-                {ttsSpeaking ? "🔊 Berbicara…" : "🔊 TTS"}
-              </button>
-            )}
           </div>
           <div
             ref={lyricsRef}
@@ -338,7 +320,7 @@ export function AnthemClient() {
                     background: isActive ? "rgba(245,200,66,0.08)" : "transparent",
                     borderLeft: isActive ? "3px solid #f5c842" : "3px solid transparent",
                   }}
-                  onClick={() => setCurrentTime(line.time)}
+                  onClick={() => seekToLyric(line.time)}
                 >
                   <div
                     className="text-[14px] font-medium leading-[1.5] transition-all duration-300"
@@ -369,7 +351,7 @@ export function AnthemClient() {
             color: "#64748b",
           }}
         >
-          🎵 Klik lirik untuk loncat ke bagian tersebut · Klik TTS untuk dengar lirik saat ini
+          🎵 Klik lirik untuk loncat ke bagian tersebut
         </div>
       </div>
     </div>

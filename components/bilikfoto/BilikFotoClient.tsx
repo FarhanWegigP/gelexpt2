@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { FILTERS, type FilterDef } from "./filterData";
+import { FILTERS, SEKBER, type FilterDef, type SekberDef } from "./filterData";
 
 type Stage = "filter" | "camera" | "preview";
 type FilterVariant = "default" | "graphic";
@@ -65,6 +65,7 @@ export function BilikFotoClient() {
   const [stripUrl, setStripUrl] = useState<string | null>(null);
   const [previewIdx, setPreviewIdx] = useState(0);
   const [graphicMap, setGraphicMap] = useState<Record<string, HTMLImageElement>>({});
+  const [selectedSekber, setSelectedSekber] = useState<SekberDef | null>(null);
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const overlayRef = useRef<HTMLCanvasElement>(null);
@@ -104,7 +105,7 @@ export function BilikFotoClient() {
       ctx.fillRect(0, 0, w, h);
       renderFilterLayer(ctx, filter, "default", graphicMap[filter.id], w, h);
     });
-  }, [graphicMap]);
+  }, [graphicMap, stage]);
 
   const currentGraphic = selectedFilter.graphicSrc ? graphicMap[selectedFilter.id] : undefined;
   const isGraphicVariant = selectedVariant === "graphic";
@@ -166,21 +167,27 @@ export function BilikFotoClient() {
     return () => cancelAnimationFrame(rafRef.current);
   }, [currentGraphic, selectedFilter, selectedVariant, stage]);
 
-  useEffect(() => () => stopCamera(), [stopCamera]);
+  // Start/stop camera when stage changes — runs AFTER render so videoRef is mounted
+  useEffect(() => {
+    if (stage === "camera") {
+      startCamera();
+    } else {
+      stopCamera();
+    }
+  }, [stage, startCamera, stopCamera]);
 
   const enterCamera = () => {
-    setStage("camera");
     setPhotos([]);
     setPhotosTaken(0);
     setShooting(false);
     shootingRef.current = false;
-    startCamera();
+    setStage("camera");
   };
 
   const exitCamera = () => {
-    stopCamera();
     setStage("filter");
     setCountdown(null);
+    setSelectedSekber(null);
   };
 
   const capturePhoto = (): string => {
@@ -328,70 +335,139 @@ export function BilikFotoClient() {
   };
 
   if (stage === "filter") {
+    // ── Step 1: pilih sekber ───────────────────────────
+    if (!selectedSekber) {
+      return (
+        <div className="min-h-screen pt-24 pb-16 px-4 flex flex-col items-center">
+          <h2
+            className="font-orbitron font-extrabold text-center mb-3"
+            style={{ fontSize: "clamp(24px,4vw,42px)", letterSpacing: "0.08em" }}
+          >
+            BILIK FOTO
+          </h2>
+          <p className="text-[14px] mb-10 text-center" style={{ color: "#64748b" }}>
+            Pilih sekber dulu, lalu pilih UKM-nya
+          </p>
+
+          <div
+            className="grid gap-5 w-full mb-8"
+            style={{ maxWidth: 760, gridTemplateColumns: "repeat(2,1fr)" }}
+          >
+            {SEKBER.map((s) => (
+              <button
+                key={s.id}
+                onClick={() => setSelectedSekber(s)}
+                className="rounded-2xl p-6 text-left cursor-pointer border transition-all duration-200"
+                style={{
+                  background: "rgba(17,24,39,0.85)",
+                  border: `1px solid ${s.color}44`,
+                  boxShadow: `0 0 0 0 ${s.glow}`,
+                }}
+                onMouseEnter={(e) => {
+                  (e.currentTarget as HTMLElement).style.boxShadow = `0 0 24px ${s.glow}`;
+                  (e.currentTarget as HTMLElement).style.borderColor = s.color;
+                }}
+                onMouseLeave={(e) => {
+                  (e.currentTarget as HTMLElement).style.boxShadow = "none";
+                  (e.currentTarget as HTMLElement).style.borderColor = `${s.color}44`;
+                }}
+              >
+                <div className="text-4xl mb-3">{s.emoji}</div>
+                <div
+                  className="font-orbitron font-black text-[16px] mb-1"
+                  style={{ color: s.color }}
+                >
+                  {s.name}
+                </div>
+                <div className="text-[12px]" style={{ color: "#64748b" }}>
+                  {s.desc}
+                </div>
+                <div
+                  className="mt-3 text-[11px] font-bold"
+                  style={{ color: s.color }}
+                >
+                  {FILTERS.filter((f) => f.sekber === s.id).length} UKM tersedia →
+                </div>
+              </button>
+            ))}
+          </div>
+
+          <Link href="/gelexy" className="btn-secondary mt-3">
+            ← Back
+          </Link>
+        </div>
+      );
+    }
+
+    // ── Step 2: pilih UKM dalam sekber ────────────────
+    const sekberFilters = FILTERS.filter((f) => f.sekber === selectedSekber.id);
     return (
       <div className="min-h-screen pt-24 pb-16 px-4 flex flex-col items-center">
-        <div className="chip mb-4">📸 BILIK FOTO</div>
+        <div className="chip mb-4" style={{ borderColor: selectedSekber.color, color: selectedSekber.color }}>
+          {selectedSekber.emoji} {selectedSekber.name.toUpperCase()}
+        </div>
         <h2
           className="font-orbitron font-extrabold text-center mb-2"
           style={{ fontSize: "clamp(18px,3vw,30px)", letterSpacing: "0.08em" }}
         >
           PILIH UKM-MU
         </h2>
-        <p className="text-[13px] mb-10 text-center" style={{ color: "#64748b" }}>
-          Pilih dulu UKM-nya. Varian filter 1 dan filter 2 akan muncul di layar kamera sebelum sesi dimulai.
+        <p className="text-[13px] mb-8 text-center" style={{ color: "#64748b" }}>
+          Pilih UKM, lalu lanjut ke kamera
         </p>
 
         <div
           className="grid gap-4 w-full mb-8"
           style={{ maxWidth: 920, gridTemplateColumns: "repeat(auto-fill,minmax(240px,1fr))" }}
         >
-          {FILTERS.map((filter, index) => (
-            <button
-              key={filter.id}
-              onClick={() => {
-                setSelectedFilter(filter);
-                setSelectedVariant("default");
-              }}
-              className="rounded-[22px] overflow-hidden cursor-pointer border-2 transition-all duration-200 text-left"
-              style={{
-                borderColor: selectedFilter.id === filter.id ? filter.color : "transparent",
-                background: "rgba(17,24,39,0.82)",
-                boxShadow: selectedFilter.id === filter.id ? `0 0 22px ${filter.color}33` : "none",
-              }}
-            >
-              <canvas
-                ref={(el) => {
-                  thumbRefs.current[index] = el;
+          {sekberFilters.map((filter) => {
+            const globalIndex = FILTERS.indexOf(filter);
+            return (
+              <button
+                key={filter.id}
+                onClick={() => {
+                  setSelectedFilter(filter);
+                  setSelectedVariant("default");
                 }}
-                width={260}
-                height={160}
-                className="w-full"
-              />
-              <div className="px-4 py-3 flex items-center gap-2">
-                <span className="text-lg">{filter.emoji}</span>
-                <span
-                  className="font-orbitron font-bold text-[12px]"
-                  style={{ color: selectedFilter.id === filter.id ? filter.color : "#f1f5f9" }}
-                >
-                  {filter.name}
-                </span>
-                <span
-                  className="ml-auto rounded-full px-2 py-1 text-[9px] font-bold uppercase"
-                  style={{ background: `${filter.color}22`, color: filter.color }}
-                >
-                  2 Varian
-                </span>
-              </div>
-            </button>
-          ))}
+                className="rounded-[22px] overflow-hidden cursor-pointer border-2 transition-all duration-200 text-left"
+                style={{
+                  borderColor: selectedFilter.id === filter.id ? filter.color : "transparent",
+                  background: "rgba(17,24,39,0.82)",
+                  boxShadow: selectedFilter.id === filter.id ? `0 0 22px ${filter.color}33` : "none",
+                }}
+              >
+                <canvas
+                  ref={(el) => { thumbRefs.current[globalIndex] = el; }}
+                  width={260}
+                  height={160}
+                  className="w-full"
+                />
+                <div className="px-4 py-3 flex items-center gap-2">
+                  <span className="text-lg">{filter.emoji}</span>
+                  <span
+                    className="font-orbitron font-bold text-[12px]"
+                    style={{ color: selectedFilter.id === filter.id ? filter.color : "#f1f5f9" }}
+                  >
+                    {filter.name}
+                  </span>
+                  <span
+                    className="ml-auto rounded-full px-2 py-1 text-[9px] font-bold uppercase"
+                    style={{ background: `${filter.color}22`, color: filter.color }}
+                  >
+                    2 Varian
+                  </span>
+                </div>
+              </button>
+            );
+          })}
         </div>
 
         <button className="btn-primary text-[15px] px-8 py-3" onClick={enterCamera}>
           📷 Lanjut Ke Kamera
         </button>
-        <Link href="/bilikfoto" className="btn-secondary mt-3">
-          ← Back
-        </Link>
+        <button className="btn-secondary mt-3" onClick={() => setSelectedSekber(null)}>
+          ← Ganti Sekber
+        </button>
       </div>
     );
   }
@@ -492,13 +568,6 @@ export function BilikFotoClient() {
               >
                 Filter 2
               </button>
-            </div>
-            <div className="mt-3 text-[12px]" style={{ color: currentGraphic ? "#94a3b8" : "#f59e0b" }}>
-              {selectedVariant === "default"
-                ? "Filter 1 hanya memakai tulisan dan overlay bawaan UKM."
-                : currentGraphic
-                  ? `Filter 2 memakai PNG dari ${selectedFilter.graphicHint} sebagai layer belakang.`
-                  : `Filter 2 sudah disiapkan, tapi PNG untuk ${selectedFilter.name} belum ada. Taruh file di ${selectedFilter.graphicHint}.`}
             </div>
           </div>
         )}
@@ -684,15 +753,6 @@ export function BilikFotoClient() {
         </button>
       </div>
 
-      <div className="fixed bottom-20 right-5 z-50">
-        <Image
-          src="/assets/mascot-gantari.png"
-          alt="Gantari"
-          width={90}
-          height={90}
-          style={{ height: 90, width: "auto", filter: "drop-shadow(0 0 12px rgba(236,72,153,0.4))" }}
-        />
-      </div>
     </div>
   );
 }

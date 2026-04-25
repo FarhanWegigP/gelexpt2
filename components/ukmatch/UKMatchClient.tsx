@@ -658,7 +658,7 @@ export function UKMatchClient() {
 
       <div className="flex gap-3 flex-wrap justify-center">
         <button className="btn-secondary" onClick={restart}>↺ Coba Lagi</button>
-        <button className="btn-primary" onClick={() => { window.location.href = "/simulasi"; }}>⊙ Simulasi UKM</button>
+        <button className="btn-primary" onClick={() => { window.location.href = "/gelexy"; }}>🌌 Gelexy</button>
       </div>
     </div>
   );

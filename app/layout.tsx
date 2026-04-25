@@ -4,7 +4,6 @@ import "./globals.css";
 import { Nav } from "@/components/Nav";
 import { StarCanvas } from "@/components/StarCanvas";
 import { MiniPlayer } from "@/components/MiniPlayer";
-import { RocketEasterEgg } from "@/components/RocketEasterEgg";
 import { AccessibilityLayer } from "@/components/AccessibilityLayer";
 import { LanguageProvider } from "@/components/LanguageProvider";
 
@@ -46,8 +45,7 @@ export default function RootLayout({
           <Nav />
           <main className="relative z-[1]">{children}</main>
           <MiniPlayer />
-          <RocketEasterEgg />
-          <AccessibilityLayer />
+<AccessibilityLayer />
         </LanguageProvider>
       </body>
     </html>

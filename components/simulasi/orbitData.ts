@@ -26,12 +26,12 @@ export const ORBIT_GROUPS: OrbitGroup[] = [
   {
     id: "rohani",
     name: "Rohani",
-    color: "#06b6d4",
-    glow: "rgba(6,182,212,0.3)",
+    color: "#22c55e",
+    glow: "rgba(34,197,94,0.3)",
     desc: "Spiritualitas & Nilai",
     emoji: "☮️",
-    planetBg: "radial-gradient(circle at 35% 35%, #2dd4bf, #0891b2 40%, #083344 80%)",
-    planetShadow: "0 0 30px rgba(6,182,212,0.5), inset -8px -8px 20px rgba(0,0,0,0.4)",
+    planetBg: "radial-gradient(circle at 35% 35%, #86efac, #22c55e 40%, #14532d 80%)",
+    planetShadow: "0 0 30px rgba(34,197,94,0.5), inset -8px -8px 20px rgba(0,0,0,0.4)",
     ukms: [
       {
         short: "JS",
@@ -98,12 +98,12 @@ export const ORBIT_GROUPS: OrbitGroup[] = [
   {
     id: "olahraga",
     name: "Olahraga",
-    color: "#f97316",
-    glow: "rgba(249,115,22,0.3)",
+    color: "#ef4444",
+    glow: "rgba(239,68,68,0.3)",
     desc: "Atletik & Kompetisi",
     emoji: "🏐",
-    planetBg: "radial-gradient(circle at 30% 30%, #fed7aa, #f97316 40%, #7c2d12 80%)",
-    planetShadow: "0 0 30px rgba(249,115,22,0.5), inset -8px -8px 20px rgba(0,0,0,0.4)",
+    planetBg: "radial-gradient(circle at 30% 30%, #fca5a5, #ef4444 40%, #7f1d1d 80%)",
+    planetShadow: "0 0 30px rgba(239,68,68,0.5), inset -8px -8px 20px rgba(0,0,0,0.4)",
     ukms: [
       {
         short: "BERKUDA",
@@ -190,12 +190,12 @@ export const ORBIT_GROUPS: OrbitGroup[] = [
   {
     id: "seni",
     name: "Seni",
-    color: "#a855f7",
-    glow: "rgba(168,85,247,0.3)",
+    color: "#7c3aed",
+    glow: "rgba(124,58,237,0.3)",
     desc: "Kreasi & Ekspresi",
     emoji: "🎨",
-    planetBg: "radial-gradient(circle at 35% 30%, #e9d5ff, #a855f7 40%, #3b0764 80%)",
-    planetShadow: "0 0 30px rgba(168,85,247,0.5), inset -8px -8px 20px rgba(0,0,0,0.4)",
+    planetBg: "radial-gradient(circle at 35% 30%, #c4b5fd, #7c3aed 40%, #2e1065 80%)",
+    planetShadow: "0 0 30px rgba(124,58,237,0.5), inset -8px -8px 20px rgba(0,0,0,0.4)",
     ukms: [
       {
         short: "TGM",
@@ -262,12 +262,12 @@ export const ORBIT_GROUPS: OrbitGroup[] = [
   {
     id: "khusus",
     name: "Khusus",
-    color: "#10b981",
-    glow: "rgba(16,185,129,0.3)",
+    color: "#1e40af",
+    glow: "rgba(30,64,175,0.3)",
     desc: "Minat & Kepemimpinan",
     emoji: "🔬",
-    planetBg: "radial-gradient(circle at 35% 35%, #a7f3d0, #10b981 40%, #064e3b 80%)",
-    planetShadow: "0 0 30px rgba(16,185,129,0.5), inset -8px -8px 20px rgba(0,0,0,0.4)",
+    planetBg: "radial-gradient(circle at 35% 35%, #93c5fd, #1e40af 40%, #1e1b4b 80%)",
+    planetShadow: "0 0 30px rgba(30,64,175,0.5), inset -8px -8px 20px rgba(0,0,0,0.4)",
     ukms: [
       {
         short: "MAPAGAMA",

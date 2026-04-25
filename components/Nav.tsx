@@ -9,8 +9,7 @@ import { tr } from "@/lib/translate";
 const links = [
   { href: "/", id: "Beranda", en: "Home" },
   { href: "/ukmatch", id: "UKMatch", en: "UKMatch" },
-  { href: "/simulasi", id: "Simulasi UKM", en: "UKM Simulation" },
-  { href: "/bilikfoto", id: "Bilik Foto", en: "Photo Booth" },
+  { href: "/gelexy", id: "Gelexy", en: "Gelexy" },
   { href: "/anthem", id: "Anthem", en: "Anthem" },
 ];
 
@@ -60,9 +59,9 @@ export function Nav() {
             href={l.href}
             className="text-[12px] font-bold tracking-[0.08em] uppercase transition-colors duration-200"
             style={{
-              color: pathname === l.href ? "#f5c842" : "#94a3b8",
+              color: pathname === l.href || (l.href !== "/" && pathname.startsWith(l.href)) ? "#f5c842" : "#94a3b8",
               textShadow:
-                pathname === l.href
+                pathname === l.href || (l.href !== "/" && pathname.startsWith(l.href))
                   ? "0 0 12px rgba(245,200,66,0.5)"
                   : "none",
             }}
@@ -109,7 +108,7 @@ export function Nav() {
               onClick={() => setMenuOpen(false)}
               className="block py-3 text-sm font-bold tracking-wide"
               style={{
-                color: pathname === l.href ? "#f5c842" : "#f1f5f9",
+                color: pathname === l.href || (l.href !== "/" && pathname.startsWith(l.href)) ? "#f5c842" : "#f1f5f9",
                 borderBottom: "1px solid rgba(241,245,249,0.05)",
               }}
             >

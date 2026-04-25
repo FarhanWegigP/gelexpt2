@@ -6,8 +6,7 @@ import { tr } from "@/lib/translate";
 
 const links = [
   { href: "/ukmatch", id: "UKMatch", en: "UKMatch" },
-  { href: "/simulasi", id: "Simulasi", en: "Simulation" },
-  { href: "/bilikfoto", id: "Bilik Foto", en: "Photo Booth" },
+  { href: "/gelexy", id: "Gelexy", en: "Gelexy" },
   { href: "/anthem", id: "Anthem", en: "Anthem" },
 ];
 

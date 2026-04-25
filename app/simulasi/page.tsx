@@ -1,7 +1,5 @@
-import { SimulasiClient } from "@/components/simulasi/SimulasiClient";
-
-export const metadata = { title: "Simulasi UKM – GELEX 2026" };
+import { redirect } from "next/navigation";
 
 export default function SimulasiPage() {
-  return <SimulasiClient />;
+  redirect("/gelexy");
 }
